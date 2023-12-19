@@ -6,54 +6,59 @@ using AutoFixture;
 using NSubstitute;
 using Xunit;
 
-namespace ApiIntegration.Cli.Tests.Unit {
-    public class RestaurantsSearchApplicationTests {
-        private readonly RestaurantsSearchApplication _sut;
-        private readonly IConsoleWriter _consoleWriter = Substitute.For<IConsoleWriter>();
-        private readonly IRestaurantsSearchService _restaurantsSearchService = Substitute.For<IRestaurantsSearchService>();
-        private readonly IFixture _fixture = new Fixture();
+namespace ApiIntegration.Cli.Tests.Unit;
 
-        public RestaurantsSearchApplicationTests() {
-            _sut = new RestaurantsSearchApplication(_consoleWriter, _restaurantsSearchService);
-        }
+public sealed class RestaurantsSearchApplicationTests
+{
+    private readonly RestaurantsSearchApplication _sut;
+    private readonly IConsoleWriter _consoleWriter = Substitute.For<IConsoleWriter>();
+    private readonly IRestaurantsSearchService _restaurantsSearchService = Substitute.For<IRestaurantsSearchService>();
+    private readonly IFixture _fixture = new Fixture();
+    private static readonly JsonSerializerOptions JsonOptions = new() { WriteIndented = true };
 
-        [Fact]
-        public async Task should_return_write_restaurants_when_outcode_is_valid() {
-            // arrange
-            const string outcode = "E2";
-            var args = new[] { "--o", outcode };
+    public RestaurantsSearchApplicationTests()
+    {
+        _sut = new RestaurantsSearchApplication(_consoleWriter, _restaurantsSearchService);
+    }
 
-            var restaurantResult = _fixture.Create<RestaurantSearchResult>();
+    [Fact]
+    public async Task should_return_write_restaurants_when_outcode_is_valid()
+    {
+        // arrange
+        const string outcode = "E2";
+        var args = new[] { "--o", outcode };
 
-            _restaurantsSearchService
-                .SearchByOutcodeAsync(new RestaurantSearchRequest(outcode))
-                .Returns(restaurantResult);
+        var restaurantResult = _fixture.Create<RestaurantSearchResult>();
 
-            var expectedText = JsonSerializer.Serialize(restaurantResult, new JsonSerializerOptions { WriteIndented = true });
+        _restaurantsSearchService
+            .SearchByOutcodeAsync(new RestaurantSearchRequest(outcode))
+            .Returns(restaurantResult);
 
-            // act
-            await _sut.RunAsync(args);
+        var expectedText = JsonSerializer.Serialize(restaurantResult, JsonOptions);
 
-            // assert
-            _consoleWriter.Received(1).WriteLine(Arg.Is(expectedText));
-        }
+        // act
+        await _sut.RunAsync(args);
 
-        [Fact]
-        public async Task should_return_write_errors_when_outcode_is_invalid() {
-            // arrange
-            const string outcode = "E2 ARR3";
-            var args = new[] { "--o", outcode };
-            var errors = new[] { "Please provide a valid UK Outcode." };
+        // assert
+        _consoleWriter.Received(1).WriteLine(Arg.Is(expectedText));
+    }
 
-            _restaurantsSearchService
-                .SearchByOutcodeAsync(new RestaurantSearchRequest(outcode))
-                .Returns(new RestaurantSearchErrors(errors));
+    [Fact]
+    public async Task should_return_write_errors_when_outcode_is_invalid()
+    {
+        // arrange
+        const string outcode = "E2 ARR3";
+        var args = new[] { "--o", outcode };
+        var errors = new[] { "Please provide a valid UK Outcode." };
 
-            // act
-            await _sut.RunAsync(args);
+        _restaurantsSearchService
+            .SearchByOutcodeAsync(new RestaurantSearchRequest(outcode))
+            .Returns(new RestaurantSearchErrors(errors));
 
-            // assert
-            _consoleWriter.Received(1).WriteLine(Arg.Is(string.Join(", ", errors)));
-        }
+        // act
+        await _sut.RunAsync(args);
+
+        // assert
+        _consoleWriter.Received(1).WriteLine(Arg.Is(string.Join(", ", errors)));
     }
 }

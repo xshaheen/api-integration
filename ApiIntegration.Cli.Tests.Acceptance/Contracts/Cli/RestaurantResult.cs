@@ -1,11 +1,12 @@
 ﻿using System.Collections.Generic;
 
-namespace ApiIntegration.Cli.Tests.Acceptance.Contracts.Cli {
-    public record RestaurantResult {
-        public string Name { get; init; } = default!;
+namespace ApiIntegration.Cli.Tests.Acceptance.Contracts.Cli;
 
-        public string Rating { get; init; } = default!;
+public sealed record RestaurantResult
+{
+    public required string Name { get; init; }
 
-        public IReadOnlyList<string> CuisineTypes { get; init; } = default!;
-    }
+    public required string Rating { get; init; }
+
+    public required IReadOnlyList<string> CuisineTypes { get; init; }
 }

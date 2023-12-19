@@ -1,15 +1,16 @@
 ﻿using System.Collections.Generic;
 using System.Text.Json.Serialization;
 
-namespace ApiIntegration.Cli.Api.Responses {
-    public record RestaurantResponse {
-        [JsonPropertyName("name")]
-        public string Name { get; init; }
+namespace ApiIntegration.Cli.Api.Responses;
 
-        [JsonPropertyName("ratingStars")]
-        public string Rating { get; init; }
+public record RestaurantResponse
+{
+    [JsonPropertyName("name")]
+    public string Name { get; init; }
 
-        [JsonPropertyName("cuisineTypes")]
-        public IReadOnlyList<CuisineTypeResponse> CuisineTypes { get; init; }
-    }
+    [JsonPropertyName("ratingStars")]
+    public string Rating { get; init; }
+
+    [JsonPropertyName("cuisineTypes")]
+    public IReadOnlyList<CuisineTypeResponse> CuisineTypes { get; init; }
 }

@@ -1,11 +1,12 @@
 ﻿using System.Collections.Generic;
 
-namespace ApiIntegration.Cli.Models {
-    public record RestaurantResult {
-        public string Name { get; init; }
+namespace ApiIntegration.Cli.Models;
 
-        public string Rating { get; init; }
+public sealed record RestaurantResult
+{
+    public string Name { get; init; }
 
-        public IReadOnlyList<string> CuisineTypes { get; init; }
-    }
+    public string Rating { get; init; }
+
+    public IReadOnlyList<string> CuisineTypes { get; init; }
 }

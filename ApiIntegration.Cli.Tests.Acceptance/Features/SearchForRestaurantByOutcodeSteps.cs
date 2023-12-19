@@ -14,88 +14,101 @@ using WireMock.RequestBuilders;
 using WireMock.ResponseBuilders;
 using WireMock.Server;
 
-namespace ApiIntegration.Cli.Tests.Acceptance.Features {
-    [Binding]
-    public sealed class SearchForRestaurantByOutcodeSteps {
-        private Process _cli = default!;
-        private string _outcode = default!;
-        private List<RestaurantRow> _setupRestaurants = default!;
+namespace ApiIntegration.Cli.Tests.Acceptance.Features;
 
-        private readonly IObjectContainer _objectContainer;
+[Binding]
+public sealed class SearchForRestaurantByOutcodeSteps
+{
+    private Process _cli = default!;
+    private string _outcode = default!;
+    private List<RestaurantRow> _setupRestaurants = default!;
 
-        public SearchForRestaurantByOutcodeSteps(IObjectContainer objectContainer) {
-            _objectContainer = objectContainer;
-        }
+    private readonly IObjectContainer _objectContainer;
 
-        [Given(@"the outcode (.*)")]
-        public void GivenTheOutcode(string outcode) {
-            _outcode = outcode;
-        }
+    public SearchForRestaurantByOutcodeSteps(IObjectContainer objectContainer)
+    {
+        _objectContainer = objectContainer;
+    }
 
-        [Given(@"the following restaurants that are delivering there")]
-        public void GivenTheFollowingRestaurantsThatAreDeliveringThere(Table table) {
-            _setupRestaurants = table.CreateSet<RestaurantRow>().ToList();
+    [Given("the outcode (.*)")]
+    public void GivenTheOutcode(string outcode)
+    {
+        _outcode = outcode;
+    }
 
-            var searchApiResponse = new RestaurantSearchResponse {
-                Restaurants = _setupRestaurants.Select(r => new RestaurantResponse {
-                    Name = r.Name,
-                    Rating = r.Rating,
-                    CuisineTypes = new CuisineTypeResponse[] { new() { Name = r.CuisineType } },
-                }).ToList(),
-            };
+    [Given("the following restaurants that are delivering there")]
+    public void GivenTheFollowingRestaurantsThatAreDeliveringThere(Table table)
+    {
+        _setupRestaurants = table.CreateSet<RestaurantRow>().ToList();
 
-            var server = _objectContainer.Resolve<WireMockServer>();
+        var searchApiResponse = new RestaurantSearchResponse
+        {
+            Restaurants = _setupRestaurants.Select(r => new RestaurantResponse
+            {
+                Name = r.Name,
+                Rating = r.Rating,
+                CuisineTypes = new CuisineTypeResponse[] { new() { Name = r.CuisineType } },
+            }).ToList(),
+        };
 
-            var request = Request.Create()
-                .WithPath($"/restaurants/by-postcode/{_outcode}")
-                .UsingGet();
+        var server = _objectContainer.Resolve<WireMockServer>();
 
-            var response = Response.Create()
-                .WithStatusCode(200)
-                .WithBody(JsonSerializer.Serialize(searchApiResponse));
+        var request = Request.Create()
+            .WithPath($"/restaurants/by-postcode/{_outcode}")
+            .UsingGet();
 
-            server.Given(request).RespondWith(response);
-        }
+        var response = Response.Create()
+            .WithStatusCode(200)
+            .WithBody(JsonSerializer.Serialize(searchApiResponse));
 
-        [When(@"a user searches for restaurants at that outcode")]
-        public void WhenAUserSearchesForRestaurantsAtThatOutcode() {
-            var server = _objectContainer.Resolve<WireMockServer>();
-            var paths = _objectContainer.Resolve<ProjectPaths>();
+        server.Given(request).RespondWith(response);
+    }
 
-            var args = $"-o {_outcode}";
-            var envVariables = new Dictionary<string, string> {
-                ["CLI_RestaurantApi__BaseAddress"] = server.Urls.First(),
-            };
+    [When("a user searches for restaurants at that outcode")]
+    public void WhenAUserSearchesForRestaurantsAtThatOutcode()
+    {
+        var server = _objectContainer.Resolve<WireMockServer>();
+        var paths = _objectContainer.Resolve<ProjectPaths>();
 
-            _cli = ProcessUtils.ExecuteDotnetCommand($"{paths.PathToExecute} {args}", envVariables);
-        }
+        var args = $"-o {_outcode}";
 
-        [Then(@"the restaurants are returned")]
-        public async Task ThenTheRestaurantsAreReturned() {
-            var resultAsText = await _cli.StandardOutput.ReadToEndAsync();
-            await _cli.WaitForExitAsync();
+        var envVariables = new Dictionary<string, string>
+        {
+            ["CLI_RestaurantApi__BaseAddress"] = server.Urls.First(),
+        };
 
-            var result = JsonSerializer.Deserialize<RestaurantSearchResult>(resultAsText);
+        _cli = ProcessUtils.ExecuteDotnetCommand($"{paths.PathToExecute} {args}", envVariables);
+    }
 
-            var expectedResult = new RestaurantSearchResult {
-                Restaurants = _setupRestaurants.Select(x => new RestaurantResult {
-                    Name = x.Name,
-                    Rating = x.Rating,
-                    CuisineTypes = new[] { x.CuisineType },
-                }).ToList(),
-            };
+    [Then("the restaurants are returned")]
+    public async Task ThenTheRestaurantsAreReturned()
+    {
+        var resultAsText = await _cli.StandardOutput.ReadToEndAsync();
+        await _cli.WaitForExitAsync();
 
-            result!.Should().BeEquivalentTo(
-                expectedResult,
-                o => o.ComparingByMembers<RestaurantSearchResult>().ComparingByMembers<RestaurantResult>()
-            );
-        }
+        var result = JsonSerializer.Deserialize<RestaurantSearchResult>(resultAsText);
 
-        [Then(@"the error ""(.*)"" is returned")]
-        public async Task ThenTheErrorIsReturned(string errorMessage) {
-            var result = await _cli.StandardOutput.ReadToEndAsync();
-            await _cli.WaitForExitAsync();
-            result.TrimEnd().Should().Be(errorMessage);
-        }
+        var expectedResult = new RestaurantSearchResult
+        {
+            Restaurants = _setupRestaurants.Select(x => new RestaurantResult
+            {
+                Name = x.Name,
+                Rating = x.Rating,
+                CuisineTypes = new[] { x.CuisineType },
+            }).ToList(),
+        };
+
+        result!.Should().BeEquivalentTo(
+            expectedResult,
+            o => o.ComparingByMembers<RestaurantSearchResult>().ComparingByMembers<RestaurantResult>()
+        );
+    }
+
+    [Then("""the error "(.*)" is returned""")]
+    public async Task ThenTheErrorIsReturned(string errorMessage)
+    {
+        var result = await _cli.StandardOutput.ReadToEndAsync();
+        await _cli.WaitForExitAsync();
+        result.TrimEnd().Should().Be(errorMessage);
     }
 }

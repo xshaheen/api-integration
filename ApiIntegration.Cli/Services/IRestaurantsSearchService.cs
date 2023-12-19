@@ -2,8 +2,9 @@
 using ApiIntegration.Cli.Models;
 using OneOf;
 
-namespace ApiIntegration.Cli.Services {
-    public interface IRestaurantsSearchService {
-        Task<OneOf<RestaurantSearchResult, RestaurantSearchErrors>> SearchByOutcodeAsync(RestaurantSearchRequest request);
-    }
+namespace ApiIntegration.Cli.Services;
+
+public interface IRestaurantsSearchService
+{
+    Task<OneOf<RestaurantSearchResult, RestaurantSearchErrors>> SearchByOutcodeAsync(RestaurantSearchRequest request);
 }

@@ -1,6 +1,8 @@
-﻿namespace ApiIntegration.Cli.Tests.Acceptance.Models {
-    public class ProjectPaths {
-        public string PathToBuild { get; init; } = default!;
-        public string PathToExecute { get; init; } = default!;
-    }
+﻿namespace ApiIntegration.Cli.Tests.Acceptance.Models;
+
+public sealed class ProjectPaths
+{
+    public required string PathToBuild { get; init; } 
+
+    public required string PathToExecute { get; init; }
 }

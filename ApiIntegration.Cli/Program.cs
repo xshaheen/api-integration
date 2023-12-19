@@ -8,9 +8,10 @@ using Microsoft.Extensions.DependencyInjection;
 using Polly;
 using Refit;
 
-namespace ApiIntegration.Cli {
-    public class Program {
-        public static async Task Main(string[] args) {
+namespace ApiIntegration.Cli;
+
+public class Program {
+    public static async Task Main(string[] args) {
             var config = _BuildConfiguration();
             var serviceProvider = _BuildServiceProvider(config);
 
@@ -19,20 +20,20 @@ namespace ApiIntegration.Cli {
             await app.RunAsync(args);
         }
 
-        private static IConfigurationRoot _BuildConfiguration() {
+    private static IConfigurationRoot _BuildConfiguration() {
             return new ConfigurationBuilder()
                 .AddJsonFile("appsettings.json")
                 .AddEnvironmentVariables("CLI_")
                 .Build();
         }
 
-        private static ServiceProvider _BuildServiceProvider(IConfiguration config) {
+    private static ServiceProvider _BuildServiceProvider(IConfiguration config) {
             var services = new ServiceCollection();
             _ConfigureServices(services, config);
             return services.BuildServiceProvider();
         }
 
-        private static void _ConfigureServices(IServiceCollection services, IConfiguration config) {
+    private static void _ConfigureServices(IServiceCollection services, IConfiguration config) {
             services.AddSingleton<RestaurantsSearchApplication>();
             services.AddSingleton<IConsoleWriter, ConsoleWriter>();
             services.AddSingleton<IRestaurantsSearchService, RestaurantsSearchService>();
@@ -47,5 +48,4 @@ namespace ApiIntegration.Cli {
                 }))
                 .ConfigureHttpClient(client => client.BaseAddress = new Uri(config["RestaurantApi:BaseAddress"]));
         }
-    }
 }

@@ -10,20 +10,21 @@ using FluentValidation;
 using NSubstitute;
 using Xunit;
 
-namespace ApiIntegration.Cli.Tests.Unit {
-    public class RestaurantsSearchService_SearchByOutcodeAsync_Tests {
-        private readonly RestaurantsSearchService _sut;
+namespace ApiIntegration.Cli.Tests.Unit;
 
-        private readonly IRestaurantApi _restaurantApi = Substitute.For<IRestaurantApi>();
-        private readonly IValidator<RestaurantSearchRequest> _validator = new RestaurantSearchRequest.Validator();
-        private readonly IFixture _fixture = new Fixture();
+public sealed class RestaurantsSearchService_SearchByOutcodeAsync_Tests {
+    private readonly RestaurantsSearchService _sut;
 
-        public RestaurantsSearchService_SearchByOutcodeAsync_Tests() {
+    private readonly IRestaurantApi _restaurantApi = Substitute.For<IRestaurantApi>();
+    private readonly IValidator<RestaurantSearchRequest> _validator = new RestaurantSearchRequest.Validator();
+    private readonly IFixture _fixture = new Fixture();
+
+    public RestaurantsSearchService_SearchByOutcodeAsync_Tests() {
             _sut = new RestaurantsSearchService(_restaurantApi, _validator);
         }
 
-        [Fact]
-        public async Task should_return_result_when_outcode_is_valid() {
+    [Fact]
+    public async Task should_return_result_when_outcode_is_valid() {
             // arrange
             const string outcode = "E2";
             var req = new RestaurantSearchRequest(outcode);
@@ -40,8 +41,8 @@ namespace ApiIntegration.Cli.Tests.Unit {
             );
         }
 
-        [Fact]
-        public async Task should_return_errors_when_outcode_is_invalid() {
+    [Fact]
+    public async Task should_return_errors_when_outcode_is_invalid() {
             // arrange
             const string outcode = "34E2";
             var req = new RestaurantSearchRequest(outcode);
@@ -52,5 +53,4 @@ namespace ApiIntegration.Cli.Tests.Unit {
             // assert
             result.AsT1.Errors.Should().BeEquivalentTo("Please provide a valid UK Outcode.");
         }
-    }
 }
